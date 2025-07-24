@@ -1,0 +1,41 @@
+name: Build & Release Modbus Sniffer
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+
+      - name: Build .exe
+        run: |
+          pyinstaller main.py --onefile --name ModbusSnifferApp
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "ModbusSnifferApp Auto Release"
+          tag_name: "auto-${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN_ADMIN }}
+
+      - name: Upload .exe to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ModbusSnifferApp.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN_ADMIN }}
